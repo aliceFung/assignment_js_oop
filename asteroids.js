@@ -3,12 +3,15 @@ model = {
 
 
   Asteroid: function(x, y, radius){
-    this.x = x;
-    this.y = y;
+    this.x = Math.floor(Math.random() * 1200);
+    this.y = Math.floor(Math.random() * 800);
     this.radius = radius;
-    this.xSpeed = 2;
-    this.ySpeed = 2;
-    console.log("this is: " + this);
+    this.xSpeed = Math.floor(Math.random() * 5);
+    this.ySpeed = Math.floor(Math.random() * 5);
+    // this.tic = function(){
+    //   this.x += this.xSpeed;
+    //   this.y += this.ySpeed;
+    // }
 
   }
 
@@ -16,10 +19,8 @@ model = {
 
 
 model.Asteroid.prototype.tic = function(){
-        console.log("this is: " + this);
         this.x += this.xSpeed;
         this.y += this.ySpeed;
-        console.log("tic fn: " +this.x +", " + this.y);
     };
 
 
@@ -29,11 +30,11 @@ view = {
 
   context: $("#board")[0].getContext("2d"),
 
-  // drawRect: function(){
-  //   view.context.fillStyle = "#ABCDEF"
-  //   view.context.fillRect(5,5, 90, 90)
-  //   console.log("drew rect")
-  // },
+  drawRect: function(){
+    view.context.fillStyle = "#ABCDEF"
+    view.context.fillRect(5,5, 90, 90)
+    console.log("drew rect")
+  },
 
   drawCircle: function(x,y,radius){
     var path = new Path2D();
@@ -50,8 +51,28 @@ view = {
 };
 
 
+var ast_array = [];
 
-view.drawCircle(600,400, 50);
-view.fillCanvas()
-view.drawCircle(601, 401, 50);
+for (var i = 0; i < 1000; i++){
+  asteroid = new model.Asteroid;
+  ast_array.push(asteroid)
+}
+
+var s_time = Date.now();
+for (i = 0; i < 100000; i++) {
+  for (j = 0; j < ast_array.length; j++) {
+    ast_array[j].tic();
+  }
+}
+
+
+
+
+console.log(Date.now() - s_time)
+
+
+
+// view.drawCircle(600,400, 50);
+// view.fillCanvas()
+// view.drawCircle(601, 401, 50);
 
