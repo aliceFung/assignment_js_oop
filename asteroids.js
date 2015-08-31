@@ -80,13 +80,15 @@ view = {
 
 controller ={
   init: function(){
+    var count = 0
     model.createAsteroids(10);
-    this.moveAsteroids();
+    setInterval(this.moveAsteroids, 60)
   },
 
   moveAsteroids: function(){
-    view.fillCanvas();
+    // view.fillCanvas();
     view.drawAsteroids();
+    console.log("tic")
     for (j = 0; j < model.asteroids.length; j++) {
       model.asteroids[j].tic();
     }
