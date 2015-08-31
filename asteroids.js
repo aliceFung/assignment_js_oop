@@ -8,16 +8,16 @@ model = {
     this.radius = radius;
     this.xSpeed = model.setSpeed(x);
     this.ySpeed = model.setSpeed(y);
-    this.tic = function(){
-      this.x += this.xSpeed;
-      this.y += this.ySpeed;
-      // check this asteroid vs all asteroids
-      for(i = 0; i  < model.asteroids.length; i++){
-        if(this != model.asteroids[i]){
-          model.checkCollision(this, model.asteroids[i])
-        }
-      }
-    };
+    // this.tic = function(){
+    //   this.x += this.xSpeed;
+    //   this.y += this.ySpeed;
+    //   // check this asteroid vs all asteroids
+    //   for(i = 0; i  < model.asteroids.length; i++){
+    //     if(this != model.asteroids[i]){
+    //       model.checkCollision(this, model.asteroids[i]);
+    //     }
+    //   }
+    // };
 
   },
 
@@ -25,9 +25,12 @@ model = {
     // use pythagorean theorem to check for collisions
     if (Math.pow((ast1.radius + ast2.radius),2) > Math.pow((ast1.x - ast2.x),2) +
                                     Math.pow((ast1.y - ast2.y),2)){
-      console.log("collisions")
-      return true
+      console.log("collisions");
+      return true;
+    } else {
+      return false;
     }
+
   },
 
   // use Math.PI*2 to set random direction? use basic trig
@@ -58,6 +61,27 @@ model = {
 
 };
 
+model.Asteroid.prototype.tic = function(){
+      this.x += this.xSpeed;
+      this.y += this.ySpeed;
+      // check this asteroid vs all asteroids
+      for(i = 0; i  < model.asteroids.length; i++){
+        asteroid = model.asteroids[i];
+
+        if(this != asteroid && model.checkCollision(this, asteroid)){
+          //make mini asteroids
+          if ( asteroid.radius > 20){
+            var mini1 = new model.Asteroid (asteroid.x - asteroid.radius, asteroid.y - asteroid.radius, asteroid.radius/2);
+            var mini2 = new model.Asteroid (asteroid.x+ asteroid.radius, asteroid.y+ asteroid.radius, asteroid.radius/2);
+            model.asteroids.push(mini1, mini2);
+          }
+          //delete asteroid from array
+          model.asteroids.splice(i, 1);
+
+
+        }
+      }
+    };
 
 view = {
 
@@ -97,15 +121,15 @@ view = {
 
 controller ={
   init: function(){
-    var count = 0
-    model.createAsteroids(10);
-    setInterval(this.moveAsteroids, 30)
+    var count = 0;
+    model.createAsteroids(50);
+    setInterval(this.moveAsteroids, 30);
   },
 
   moveAsteroids: function(){
     view.fillCanvas();
     view.drawAsteroids(model.asteroids);
-    console.log("tic")
+    console.log("tic");
     for (j = 0; j < model.asteroids.length; j++) {
       model.asteroids[j].tic();
     }
