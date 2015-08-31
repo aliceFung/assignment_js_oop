@@ -11,15 +11,32 @@ model = {
     this.tic = function(){
       this.x += this.xSpeed;
       this.y += this.ySpeed;
+      // check this asteroid vs all asteroids
+      for(i = 0; i  < model.asteroids.length; i++){
+        if(this != model.asteroids[i]){
+          model.checkCollision(this, model.asteroids[i])
+        }
+      }
     };
 
   },
 
+  checkCollision: function(ast1, ast2){
+    // use pythagorean theorem to check for collisions
+    if (Math.pow((ast1.radius + ast2.radius),2) > Math.pow((ast1.x - ast2.x),2) +
+                                    Math.pow((ast1.y - ast2.y),2)){
+      console.log("collisions")
+      return true
+    }
+  },
+
+  // use Math.PI*2 to set random direction? use basic trig
+
   setSpeed: function(num){
     if (num < 0){
-      return Math.floor(Math.random() * 5);
+      return Math.floor(Math.random() * 10);
     } else {
-      return Math.floor(Math.random() * -5);
+      return Math.floor(Math.random() * -10);
     }
   },
 
@@ -31,7 +48,7 @@ model = {
       x = Math.floor(Math.random() * 1400 - 100); // outside canvas
       y = Math.floor(Math.random() * 1000 - 100);
       radius = Math.floor(Math.random()*50 + 20);
-      if ((x < 0 || x > 1200) && (y < 0 || y > 800)){
+      if ((x < 0 || x > 1200) || (y < 0 || y > 800)){
         model.asteroids.push( new model.Asteroid (x,y, radius));
         asteroidCount++;
 
@@ -68,9 +85,9 @@ view = {
     view.context.fillRect(0,0, 1200, 800); //overwriting canvas
   },
 
-  drawAsteroids: function(){
-    for(var i = 0; i < model.asteroids.length; i++){
-      asteroid = model.asteroids[i];
+  drawAsteroids: function(asteroids){
+    for(var i = 0; i < asteroids.length; i++){
+      asteroid = asteroids[i];
       view.drawCircle(asteroid.x, asteroid.y, asteroid.radius);
     }
   }
@@ -82,12 +99,12 @@ controller ={
   init: function(){
     var count = 0
     model.createAsteroids(10);
-    setInterval(this.moveAsteroids, 60)
+    setInterval(this.moveAsteroids, 30)
   },
 
   moveAsteroids: function(){
-    // view.fillCanvas();
-    view.drawAsteroids();
+    view.fillCanvas();
+    view.drawAsteroids(model.asteroids);
     console.log("tic")
     for (j = 0; j < model.asteroids.length; j++) {
       model.asteroids[j].tic();
