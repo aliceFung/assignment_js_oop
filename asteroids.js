@@ -2,6 +2,18 @@ model = {
 
   asteroids: [],
 
+  init: function(){
+    this.createSpaceship();
+  },
+
+  createSpaceship: function(){
+    model.ship = {x: 600,
+                  y: 400,
+                  direction: 0,
+                  xSpeed: 0,
+                  ySpeed: 0};
+  },
+
   Asteroid: function(x, y, radius){
     this.x = x;
     this.y = y;
@@ -21,10 +33,10 @@ model = {
 
   },
 
-  checkCollision: function(ast1, ast2){
+  checkCollision: function(obj1, obj2){
     // use pythagorean theorem to check for collisions
-    if (Math.pow((ast1.radius + ast2.radius),2) > Math.pow((ast1.x - ast2.x),2) +
-      Math.pow((ast1.y - ast2.y),2)){
+    if (Math.pow((obj1.radius + obj2.radius),2) > Math.pow((obj1.x - obj2.x),2) +
+      Math.pow((obj1.y - obj2.y),2)){
       console.log("collisions");
     return true;
     } else {
@@ -80,14 +92,16 @@ model = {
     do{
       x = Math.floor(Math.random() * 1400 - 100); // outside canvas
       y = Math.floor(Math.random() * 1000 - 100);
-      radius = Math.floor(Math.random()*100 + 30);
+      radius = Math.floor(Math.random()*50 + 30);
       if ((x < 0 || x > 1200) || (y < 0 || y > 800)){
         model.asteroids.push( new model.Asteroid (x,y, radius));
         asteroidCount++;
 
       }
     } while (asteroidCount < num);
-  }
+  },
+
+
 
 };
 
@@ -104,18 +118,33 @@ model.Asteroid.prototype.tic = function(){
   }
 };
 
-    view = {
+view = {
 
-      context: $("#board")[0].getContext("2d"),
+  context: $("#board")[0].getContext("2d"),
 
-  // init: funtions(){
+  //add listeners
+  init: function(){
+    $(document).keydown(function(event){
+      view.changeShipDirection(event);
+    });
+  },
 
-  // },
+  changeShipDirection: function(event){
 
-  drawRect: function(){
-    view.context.fillStyle = "#ABCDEF"
-    view.context.fillRect(5,5, 90, 90)
-    console.log("drew rect")
+    view.context.save();
+    view.context.rotate(model.ship.direction);
+
+    view.context.restore();
+    // this.currentDirection = this.userMove[event.which];
+  },
+
+  drawShip: function(x,y){
+    var path=new Path2D();
+    console.log(path);
+    path.moveTo(x,y);
+    path.lineTo(x+15, y+40);
+    path.lineTo(x-15, y+40);
+    view.context.fill(path);
   },
 
   drawCircle: function(x,y,radius){
@@ -126,8 +155,8 @@ model.Asteroid.prototype.tic = function(){
 
   //~ animation, draw one, clear, draw
   fillCanvas: function(){
-    view.context.fillStyle = '#ffffff';
-    view.context.fillRect(0,0, 1200, 800); //overwriting canvas
+    // view.context.fillStyle = '#ffffff';
+    view.context.clearRect(0,0, 1200, 800); //overwriting canvas
   },
 
   drawAsteroids: function(asteroids){
@@ -135,7 +164,17 @@ model.Asteroid.prototype.tic = function(){
       asteroid = asteroids[i];
       view.drawCircle(asteroid.x, asteroid.y, asteroid.radius);
     }
+  },
+
+  userMove: {
+    37: 'left',
+    38: 'up',
+    39: 'right',
+    40: 'down'//,
+
   }
+
+
 
 
 };
@@ -144,12 +183,13 @@ model.Asteroid.prototype.tic = function(){
 controller ={
   init: function(){
     var count = 0;
-    model.createAsteroids(1000);
-    setInterval(this.gameLoop, 60);
+    view.init();
+    model.createAsteroids(10);
+    setInterval(this.gameLoop, 50);
+    model.createSpaceship();
   },
 
   moveAsteroids: function(){
-    view.fillCanvas();
     view.drawAsteroids(model.asteroids);
     // console.log("tic");
     for (j = 0; j < model.asteroids.length; j++) {
@@ -157,13 +197,20 @@ controller ={
     }
   },
 
+  moveShip: function(){
+    view.drawShip(model.ship.x, model.ship.y);
+  },
 
   gameLoop: function(){
-    controller.moveAsteroids()
+    view.fillCanvas();
+    controller.moveShip();
+    controller.moveAsteroids();
     do {
-      model.createAsteroids(1)
-    } while (model.asteroids.length <= 10)
+      model.createAsteroids(1);
+    } while (model.asteroids.length <= 10);
   }
+
+
 //   loop {
 //   fillCanvas() ; //start with a blank canvas
 //   drawAsteroids() // draw
