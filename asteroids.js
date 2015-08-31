@@ -1,34 +1,54 @@
 model = {
 
-
+  asteroids: [],
 
   Asteroid: function(x, y, radius){
-    this.x = Math.floor(Math.random() * 1200);
-    this.y = Math.floor(Math.random() * 800);
+    this.x = x;
+    this.y = y;
     this.radius = radius;
-    this.xSpeed = Math.floor(Math.random() * 5);
-    this.ySpeed = Math.floor(Math.random() * 5);
-    // this.tic = function(){
-    //   this.x += this.xSpeed;
-    //   this.y += this.ySpeed;
-    // }
+    this.xSpeed = model.setSpeed(x);
+    this.ySpeed = model.setSpeed(y);
+    this.tic = function(){
+      this.x += this.xSpeed;
+      this.y += this.ySpeed;
+    };
 
+  },
+
+  setSpeed: function(num){
+    if (num < 0){
+      return Math.floor(Math.random() * 5);
+    } else {
+      return Math.floor(Math.random() * -5);
+    }
+  },
+
+
+
+  createAsteroids: function(num){
+    var asteroidCount = 0;
+    do{
+      x = Math.floor(Math.random() * 1400 - 100); // outside canvas
+      y = Math.floor(Math.random() * 1000 - 100);
+      radius = Math.floor(Math.random()*50 + 20);
+      if ((x < 0 || x > 1200) && (y < 0 || y > 800)){
+        model.asteroids.push( new model.Asteroid (x,y, radius));
+        asteroidCount++;
+
+      }
+    } while (asteroidCount < num);
   }
 
 };
 
 
-model.Asteroid.prototype.tic = function(){
-        this.x += this.xSpeed;
-        this.y += this.ySpeed;
-    };
-
-
-
-
 view = {
 
   context: $("#board")[0].getContext("2d"),
+
+  // init: funtions(){
+
+  // },
 
   drawRect: function(){
     view.context.fillStyle = "#ABCDEF"
@@ -46,33 +66,39 @@ view = {
   fillCanvas: function(){
     view.context.fillStyle = '#ffffff';
     view.context.fillRect(0,0, 1200, 800); //overwriting canvas
+  },
+
+  drawAsteroids: function(){
+    for(var i = 0; i < model.asteroids.length; i++){
+      asteroid = model.asteroids[i];
+      view.drawCircle(asteroid.x, asteroid.y, asteroid.radius);
+    }
   }
 
 };
 
 
-var ast_array = [];
+controller ={
+  init: function(){
+    model.createAsteroids(10);
+    this.moveAsteroids();
+  },
 
-for (var i = 0; i < 1000; i++){
-  asteroid = new model.Asteroid;
-  ast_array.push(asteroid)
-}
+  moveAsteroids: function(){
+    view.fillCanvas();
+    view.drawAsteroids();
+    for (j = 0; j < model.asteroids.length; j++) {
+      model.asteroids[j].tic();
+    }
 
-var s_time = Date.now();
-for (i = 0; i < 100000; i++) {
-  for (j = 0; j < ast_array.length; j++) {
-    ast_array[j].tic();
   }
-}
+//   loop {
+//   fillCanvas() ; //start with a blank canvas
+//   drawAsteroids() // draw
+//   tic() // move all asteriods
+// // loop will then clear canvase and draw asteroids in their new positions
 
 
+};
 
-
-console.log(Date.now() - s_time)
-
-
-
-// view.drawCircle(600,400, 50);
-// view.fillCanvas()
-// view.drawCircle(601, 401, 50);
-
+controller.init();
