@@ -24,16 +24,37 @@ model = {
   checkCollision: function(ast1, ast2){
     // use pythagorean theorem to check for collisions
     if (Math.pow((ast1.radius + ast2.radius),2) > Math.pow((ast1.x - ast2.x),2) +
-                                    Math.pow((ast1.y - ast2.y),2)){
+      Math.pow((ast1.y - ast2.y),2)){
       console.log("collisions");
-      return true;
+    return true;
     } else {
-      return false;
+    return false;
     }
 
   },
 
-  // use Math.PI*2 to set random direction? use basic trig
+  spawnAsteroids: function(asteroid){
+    //make mini asteroids
+      var mini1 = new model.Asteroid (asteroid.x - asteroid.radius, asteroid.y - asteroid.radius, asteroid.radius/2);
+      var mini2 = new model.Asteroid (asteroid.x + asteroid.radius, asteroid.y + asteroid.radius, asteroid.radius/2);
+      model.asteroids.push(mini1, mini2);
+
+  },
+
+  destroyAsteroids: function(arr){
+      if (arr[0].radius > arr[1].radius && arr[0].radius > 40){
+      //delete asteroid from array
+       model.spawnAsteroids(arr[0])
+      }
+      else if (arr[0].radius < arr[1].radius && arr[1].radius > 40){
+        model.spawnAsteroids(arr[1])
+      }
+    for (var i = 0; i < 2; i++){
+      model.asteroids.splice(model.asteroids.indexOf(arr[i]), 1);
+    }
+  },
+
+// use Math.PI*2 to set random direction? use basic trig
 
   setSpeed: function(num){
     if (num < 0){
@@ -45,12 +66,21 @@ model = {
 
 
 
+  checkLeave: function(asteroid){
+    if ((asteroid.x < -100 || asteroid.x > 1300) ||
+        (asteroid.y < -100 || asteroid.y > 900)) {
+       model.asteroids.splice(model.asteroids.indexOf(asteroid), 1)
+    }
+  },
+
+
+
   createAsteroids: function(num){
     var asteroidCount = 0;
     do{
       x = Math.floor(Math.random() * 1400 - 100); // outside canvas
       y = Math.floor(Math.random() * 1000 - 100);
-      radius = Math.floor(Math.random()*50 + 20);
+      radius = Math.floor(Math.random()*100 + 30);
       if ((x < 0 || x > 1200) || (y < 0 || y > 800)){
         model.asteroids.push( new model.Asteroid (x,y, radius));
         asteroidCount++;
@@ -62,30 +92,21 @@ model = {
 };
 
 model.Asteroid.prototype.tic = function(){
-      this.x += this.xSpeed;
-      this.y += this.ySpeed;
-      // check this asteroid vs all asteroids
-      for(i = 0; i  < model.asteroids.length; i++){
-        asteroid = model.asteroids[i];
+  this.x += this.xSpeed;
+  this.y += this.ySpeed;
+  model.checkLeave(this);
+    // check this asteroid vs all asteroids
+  for(i = 0; i  < model.asteroids.length; i++){
+    asteroid = model.asteroids[i];
+    if(this != asteroid && model.checkCollision(this, asteroid)){
+      model.destroyAsteroids([this, asteroid])
+    }
+  }
+};
 
-        if(this != asteroid && model.checkCollision(this, asteroid)){
-          //make mini asteroids
-          if ( asteroid.radius > 20){
-            var mini1 = new model.Asteroid (asteroid.x - asteroid.radius, asteroid.y - asteroid.radius, asteroid.radius/2);
-            var mini2 = new model.Asteroid (asteroid.x+ asteroid.radius, asteroid.y+ asteroid.radius, asteroid.radius/2);
-            model.asteroids.push(mini1, mini2);
-          }
-          //delete asteroid from array
-          model.asteroids.splice(i, 1);
+    view = {
 
-
-        }
-      }
-    };
-
-view = {
-
-  context: $("#board")[0].getContext("2d"),
+      context: $("#board")[0].getContext("2d"),
 
   // init: funtions(){
 
@@ -116,30 +137,38 @@ view = {
     }
   }
 
+
 };
 
 
 controller ={
   init: function(){
     var count = 0;
-    model.createAsteroids(50);
-    setInterval(this.moveAsteroids, 30);
+    model.createAsteroids(1000);
+    setInterval(this.gameLoop, 60);
   },
 
   moveAsteroids: function(){
     view.fillCanvas();
     view.drawAsteroids(model.asteroids);
-    console.log("tic");
+    // console.log("tic");
     for (j = 0; j < model.asteroids.length; j++) {
       model.asteroids[j].tic();
     }
+  },
 
+
+  gameLoop: function(){
+    controller.moveAsteroids()
+    do {
+      model.createAsteroids(1)
+    } while (model.asteroids.length <= 10)
   }
 //   loop {
 //   fillCanvas() ; //start with a blank canvas
 //   drawAsteroids() // draw
-//   tic() // move all asteriods
-// // loop will then clear canvase and draw asteroids in their new positions
+//   tic() // move all asteroids
+// // loop will then clear canvas and draw asteroids in their new positions
 
 
 };
