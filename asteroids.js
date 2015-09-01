@@ -37,7 +37,7 @@ model = {
     // use pythagorean theorem to check for collisions
     if (Math.pow((obj1.radius + obj2.radius),2) > Math.pow((obj1.x - obj2.x),2) +
       Math.pow((obj1.y - obj2.y),2)){
-      console.log("collisions");
+      // console.log("collisions");
     return true;
     } else {
     return false;
@@ -92,7 +92,7 @@ model = {
     do{
       x = Math.floor(Math.random() * 1400 - 100); // outside canvas
       y = Math.floor(Math.random() * 1000 - 100);
-      radius = Math.floor(Math.random()*50 + 30);
+      radius = Math.floor(Math.random()*20 + 30);
       if ((x < 0 || x > 1200) || (y < 0 || y > 800)){
         model.asteroids.push( new model.Asteroid (x,y, radius));
         asteroidCount++;
@@ -130,17 +130,21 @@ view = {
   },
 
   changeShipDirection: function(event){
+    if (event.which == 37 || event.which == 39){
+      model.ship.direction += view.userMove[event.which] *5/30
+    }
 
-    view.context.save();
-    view.context.rotate(model.ship.direction);
-
-    view.context.restore();
-    // this.currentDirection = this.userMove[event.which];
+    if (event.which == 38){
+      console.log("up")
+      model.ship.xSpeed += Math.sin(model.ship.direction)*1
+      model.ship.ySpeed += Math.cos(model.ship.direction)*-1
+    }
+    // this.currentDirection += this.userMove[event.which];
   },
 
   drawShip: function(x,y){
     var path=new Path2D();
-    console.log(path);
+    // console.log(path);
     path.moveTo(x,y);
     path.lineTo(x+15, y+40);
     path.lineTo(x-15, y+40);
@@ -167,10 +171,10 @@ view = {
   },
 
   userMove: {
-    37: 'left',
+    37: -1,
     38: 'up',
-    39: 'right',
-    40: 'down'//,
+    39: 1,
+    // 40: 'down'//,
 
   }
 
@@ -184,7 +188,7 @@ controller ={
   init: function(){
     var count = 0;
     view.init();
-    model.createAsteroids(10);
+    // model.createAsteroids(2);
     setInterval(this.gameLoop, 50);
     model.createSpaceship();
   },
@@ -198,16 +202,24 @@ controller ={
   },
 
   moveShip: function(){
-    view.drawShip(model.ship.x, model.ship.y);
+    // change velocity based on input
+    model.ship.x += model.ship.xSpeed
+    model.ship.y += model.ship.ySpeed
+    view.context.save();
+    view.context.translate(model.ship.x, model.ship.y)
+    view.context.rotate(model.ship.direction);
+    view.drawShip(0, -20);
+    view.context.restore();
   },
 
   gameLoop: function(){
     view.fillCanvas();
+    model.ship.direction
     controller.moveShip();
     controller.moveAsteroids();
     do {
       model.createAsteroids(1);
-    } while (model.asteroids.length <= 10);
+    } while (model.asteroids.length <= 2);
   }
 
 
