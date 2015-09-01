@@ -1,9 +1,17 @@
 model = {
 
   asteroids: [],
+  bullets: [],
 
   init: function(){
     this.createSpaceship();
+  },
+
+  fireBullets: function(){
+    var bullet = new model.Asteroid(model.ship.x, model.ship.y, 5);
+    bullet.xSpeed = Math.sin(model.ship.direction)*10;
+    bullet.ySpeed = Math.cos(model.ship.direction)*-10;
+    model.asteroids.push(bullet);
   },
 
   createSpaceship: function(){
@@ -78,6 +86,7 @@ model = {
 
 
 
+
   checkLeave: function(asteroid){
     if ((asteroid.x < -100 || asteroid.x > 1300) ||
         (asteroid.y < -100 || asteroid.y > 900)) {
@@ -131,13 +140,16 @@ view = {
 
   changeShipDirection: function(event){
     if (event.which == 37 || event.which == 39){
-      model.ship.direction += view.userMove[event.which] *5/30
+      model.ship.direction += view.userMove[event.which] * 0.25;
     }
 
     if (event.which == 38){
       console.log("up")
       model.ship.xSpeed += Math.sin(model.ship.direction)*1
       model.ship.ySpeed += Math.cos(model.ship.direction)*-1
+    }
+    if (event.which == 32){
+      model.fireBullets();
     }
     // this.currentDirection += this.userMove[event.which];
   },
@@ -155,6 +167,10 @@ view = {
     var path = new Path2D();
     path.arc(x,y,radius,0,Math.PI*2,false);
     view.context.stroke(path);
+  },
+
+  drawBullet: function(x,y){
+    //create asteroid
   },
 
   //~ animation, draw one, clear, draw
@@ -175,6 +191,7 @@ view = {
     38: 'up',
     39: 1,
     // 40: 'down'//,
+    32: 'bullets'
 
   }
 
@@ -203,10 +220,11 @@ controller ={
 
   moveShip: function(){
     // change velocity based on input
-    model.ship.x += model.ship.xSpeed
-    model.ship.y += model.ship.ySpeed
+
+    model.ship.x += model.ship.xSpeed;
+    model.ship.y += model.ship.ySpeed;
     view.context.save();
-    view.context.translate(model.ship.x, model.ship.y)
+    view.context.translate(model.ship.x, model.ship.y);
     view.context.rotate(model.ship.direction);
     view.drawShip(0, -20);
     view.context.restore();
